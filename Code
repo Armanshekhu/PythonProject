@@ -1,1 +1,164 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from scipy import stats
+
+df = pd.read_csv(r'C:\Users\Arman\Downloads\Telecom+Customer+Churn1\telecom_customer_churn1.csv')
+df.head()
+
+df_cleaned = df.copy()
+
+df_cleaned['Avg Monthly Long Distance Charges'] = df_cleaned['Avg Monthly Long Distance Charges'].fillna(
+    df_cleaned['Avg Monthly Long Distance Charges'].mean()
+)
+
+df_cleaned['Avg Monthly GB Download'] = df_cleaned['Avg Monthly GB Download'].fillna(
+    df_cleaned['Avg Monthly GB Download'].mean()
+)
+
+df_cleaned['Internet Type'] = df_cleaned['Internet Type'].fillna(df_cleaned['Internet Type'].mode()[0])
+df_cleaned['Device Protection Plan'] = df_cleaned['Device Protection Plan'].fillna(df_cleaned['Device Protection Plan'].mode()[0])
+
+df_cleaned['Premium Tech Support'] = df_cleaned['Premium Tech Support'].fillna(df_cleaned['Premium Tech Support'].mode()[0])
+df_cleaned['Unlimited Data'] = df_cleaned['Unlimited Data'].fillna(df_cleaned['Unlimited Data'].mode()[0])
+
+df_cleaned['Churn Category'] = df_cleaned['Churn Category'].fillna('No Churn')
+df_cleaned['Churn Reason'] = df_cleaned['Churn Reason'].fillna('No Churn')
+
+
+print("Remaining missing values:\n", df_cleaned.isnull().sum())
+
+df_cleaned.to_csv(r"C:\Users\Arman\Downloads\telecom_churn1_cleaned.csv", index=False)
+
+print("Total number of columns:", len(df_cleaned.columns))
+
+print(df_cleaned.columns.tolist())
+
+print("\n Summary Statistics")
+print(df.describe())
+
+gender_counts = df['Gender'].value_counts()]\]=-po]=-0
+plt.figure(figsize=(6, 6))
+plt.pie(gender_counts, labels=gender_counts.index, autopct='%1.1f%%', startangle=90, colors=['lightblue', 'lightgreen'])
+plt.title("Overall Gender Distribution")
+plt.axis('equal')
+plt.show()
+
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+sns.countplot(data=df_cleaned, x='Gender', hue='Customer Status') 
+plt.title("Gender-wise Churn Analysis")
+plt.xlabel("Gender")
+plt.ylabel("Number of Customers")
+plt.show()
+
+plt.figure(figsize=(8, 6))
+sns.scatterplot(data=df, x='Monthly Charge', y='Total Charges', hue='Internet Type')
+plt.title("Monthly vs Total Charges by Internet Type")
+plt.xlabel("Monthly Charges")
+plt.ylabel("Total Charges")
+plt.tight_layout()
+plt.show()
+
+sns.countplot(data=df_cleaned, x='Internet Type', hue='Customer Status')
+plt.title("Internet Type vs Churn")
+plt.xlabel("Internet Type")
+plt.ylabel("Number of Customers")
+plt.xticks(rotation=45)
+plt.show()
+
+sns.histplot(data=df_cleaned, x='Monthly Charge', kde=True, color='skyblue')
+plt.title("Monthly Charges Distribution")
+plt.xlabel("Monthly Charges")
+plt.ylabel("Count")
+plt.show()
+
+monthly_charges = df['Monthly Charge'].dropna()
+
+Q1 = monthly_charges.quantile(0.25)
+Q3 = monthly_charges.quantile(0.75)
+IQR = Q3 - Q1
+
+lower_bound = Q1 - 1.5 * IQR
+upper_bound = Q3 + 1.5 * IQR
+
+outliers = monthly_charges[(monthly_charges < lower_bound) | (monthly_charges > upper_bound)]
+
+print("Monthly Charges IQR Analysis:")
+print("Q1 (25th percentile):", Q1)
+print("Q3 (75th percentile):", Q3)
+print("IQR:", IQR)
+print("Lower Bound:", lower_bound)
+print("Upper Bound:", upper_bound)
+print("Number of Outliers:", len(outliers))
+
+plt.figure(figsize=(8, 5))
+sns.boxplot(x=monthly_charges, color="skyblue")
+plt.title("Box Plot for Monthly Charges with IQR Outliers")
+plt.xlabel("Monthly Charge")
+plt.grid(True)
+plt.show()
+
+
+numerical_df = df_cleaned.select_dtypes(include='number')
+plt.figure(figsize=(12, 8))
+sns.heatmap(numerical_df.corr(), annot=True, cmap='coolwarm')
+plt.title("Correlation Heatmap")
+plt.show()
+
+monthly = df['Monthly Charge'].dropna()
+total = df['Total Charges'].dropna()
+
+monthly_arr = np.array(monthly)
+total_arr = np.array(total)
+
+mean_monthly = np.mean(monthly_arr)
+mean_total = np.mean(total_arr)
+
+std_monthly = np.std(monthly_arr)
+std_total = np.std(total_arr)
+
+n1 = len(monthly_arr)
+n2 = len(total_arr)
+
+z_score = (mean_monthly - mean_total) / np.sqrt((std_monthly**2/n1) + (std_total**2/n2))
+
+p_value = stats.norm.sf(abs(z_score)) * 2
+
+print("Z-Test Result (Monthly Charge vs Total Charges):")
+print("Z-Score:", z_score)
+print("P-Value:", p_value)
+
+if p_value < 0.05:
+    print("Conclusion: Significant difference between Monthly and Total Charges (Reject H0) means null hypothesis")
+else:
+    print("Conclusion: No significant difference (Fail to Reject H0)")
+
+sns.countplot(data=df_cleaned, y='Churn Category', order=df_cleaned['Churn Category'].value_counts().index)
+plt.title("Churn Category Analysis")
+plt.xlabel("Number of Customers")
+plt.ylabel("Churn Category")
+plt.show()
+
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(9, 6))
+
+sns.boxplot(
+    data=df,
+    x='Churn Category',
+    y='Total Charges',
+    hue='Churn Category',       
+    palette='Pastel1',
+    legend=False                 
+)
+
+plt.title("Total Charges by Churn Category", fontsize=14)
+plt.xlabel("Churn Category", fontsize=12)
+plt.ylabel("Total Charges", fontsize=12)
+plt.xticks(rotation=15)
+plt.show()
 
